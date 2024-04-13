@@ -15,7 +15,16 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $projects = Project::orderBy('created_at', 'desc')->paginate();
+        $projects = Project::select(['id', 'user_id', 'category_id', 'title', 'content', 'image'])
+        ->with(['category:id,lable,color', 'tecnologies:id,lable,color'])
+        ->orderBy('created_at', 'DESC')
+        ->paginate();
+
+        foreach($projects as $project) {
+            $project->image = !empty($project->image) ? asset('/storage/' . $project->image) : null;
+            $project->content = $project->getAbstract(45);
+        };
+
         return response()->json($projects);
     }
 
