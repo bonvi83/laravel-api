@@ -15,7 +15,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $projects = Project::select(['id', 'user_id', 'category_id', 'title', 'content', 'image'])
+        $projects = Project::select(['id', 'user_id', 'category_id', 'title', 'content', 'image', 'slug'])
         ->with(['category:id,lable,color', 'tecnologies:id,lable,color'])
         ->orderBy('created_at', 'DESC')
         ->paginate();
@@ -43,12 +43,19 @@ class ProjectController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int  $slug
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($slug)
     {
-        //
+        $project = Project::select(['id', 'user_id', 'category_id', 'title', 'content', 'image', 'slug'])
+        ->with(['category:id,lable,color', 'tecnologies:id,lable,color'])
+        ->first();
+
+        $project->image = !empty($project->image) ? asset('/storage/' . $project->image) : null;
+        $project->content = $project->getAbstract(45);
+
+        return response()->json($project);
     }
 
     /**
